@@ -22,7 +22,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* Base (qwerty)
  * ,----------------------------------,                             ,----------------------------------,
- * |   Q  |   W  |   E  |   R  |   T  |                             |   Y  |   U  |   I  |   O  |   P  | 
+ * |   Q  |   W  |   E  |   R  |   T  |                             |   Y  |   U  |   I  |   O  |   P  |
  * |------+------+------+------+------|                             |-------------+------+------+------|
  * |   A  |   S  |   D  |   F  |   G  |                             |   H  |   J  |   K  |   L  |   ;  |
  * |------+------+------+------+------|                             |------|------+------+------+------|
@@ -30,7 +30,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+-------------,                             ,-------------+------+------+------,
  *        |  [   |   ]  |                                                         |   -  |   =  |
  *        '------+------'-------------'                             '-------------'------+------'
- *                      | esc  |  bs  |                             | space|enter |
+ *                      | esc  |enter |                             | space|  bs  |
  *                      |  +   |   +  |                             |  +   |  +   |
  *                      | shift| ctrl |                             | alt  |shift |
  *                      '------+------'                             '------+------'
@@ -46,14 +46,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                                     KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, \
   KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                                     KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_QUOT, \
            KC_LBRC, KC_RBRC,                                                             KC_MINS, KC_EQL,       \
-                             SFT_T(KC_ESC),  CTL_T(KC_BSPC),  ALT_T(KC_SPC),  SFT_T(KC_ENT),                    \
+                             SFT_T(KC_ESC),  CTL_T(KC_ENT),  ALT_T(KC_SPC),  SFT_T(KC_BSPC),                    \
                                    KC_TAB,            KC_HOME, KC_END,  KC_DEL,                                 \
                                    LT(_NAV, KC_BSLS), KC_GRV,  KC_LGUI, LT(_NUM, KC_SLSH)                       \
 ),
 
 /* Navigation layer
  * ,----------------------------------,                             ,----------------------------------,
- * |      |      |  mup |      |      |                             |      |      |  up  |      |      | 
+ * |      |      |  mup |      |      |                             |      |      |  up  |      |      |
  * |------+------+------+------+------|                             |-------------+------+------+------|
  * |      | mleft| mdown|mright|      |                             |      | left | down |right |      |
  * |------+------+------+------+------|                             |------|------+------+------+------|
