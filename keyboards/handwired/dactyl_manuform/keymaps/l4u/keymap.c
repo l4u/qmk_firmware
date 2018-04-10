@@ -37,7 +37,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                    '------+------' '------+------'
  *                                    |  tab | home | | end  |  del |
  *                                    |------+------' '------+------|
- *                                    |\(NAV)| gui  | |  `   |/(NUM)|
+ *                                    |  \   | gui  | |   `  |  /   |
+ *                                    |  +   |      | |   +  |  +   |
+ *                                    | NAV  |      | |  gui | NUM  |
  *                                    '------+------' '------+------'
  */
 
@@ -48,7 +50,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
            KC_LBRC, KC_RBRC,                                                             KC_MINS, KC_EQL,       \
                              SFT_T(KC_ESC),  CTL_T(KC_ENT),  ALT_T(KC_SPC),  SFT_T(KC_BSPC),                    \
                                    KC_TAB,            KC_HOME, KC_END,  KC_DEL,                                 \
-                                   LT(_NAV, KC_BSLS), KC_LGUI,  KC_GRV, LT(_NUM, KC_SLSH)                       \
+                                   LT(_NAV, KC_BSLS), KC_LGUI,  GUI_T(KC_GRV), LT(_NUM, KC_SLSH)                       \
 ),
 
 /* Navigation layer
