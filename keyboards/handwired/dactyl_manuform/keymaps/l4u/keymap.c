@@ -73,7 +73,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 
 [_NAV] = KEYMAP( \
-  KC_TRNS,  KC_TRNS,     KC_MS_UP,   KC_TRNS,     KC_TRNS, KC_TRNS, KC_TRNS,  KC_UP,   KC_TRNS, KC_TRNS, \
+  RESET,  KC_TRNS,     KC_MS_UP,   KC_TRNS,     KC_TRNS, KC_TRNS, KC_TRNS,  KC_UP,   KC_TRNS, KC_TRNS, \
   KC_TRNS,  KC_MS_LEFT,  KC_MS_DOWN, KC_MS_RIGHT, KC_TRNS, KC_TRNS, KC_LEFT, KC_DOWN, KC_RIGHT, KC_TRNS, \
   KC_TRNS,  KC_TRNS,     KC_TRNS,    KC_TRNS,     KC_TRNS, KC_TRNS, KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, \
             KC_TRNS,  KC_TRNS,                                      KC_MS_BTN1, KC_MS_BTN2, \
