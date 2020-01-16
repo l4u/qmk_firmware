@@ -1,6 +1,6 @@
 # elephant42
 
-![elephant42](https://imgur.com/a/HhfQvHT)
+[![elephant42](https://i.imgur.com/rgvNteb.jpg)](https://i.imgur.com/rgvNteb.jpg)
 
 A split keyboard with 3x5+2 vertically staggered keys and 4 thumb keys.
 
