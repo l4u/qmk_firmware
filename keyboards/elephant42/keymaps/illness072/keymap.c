@@ -16,13 +16,14 @@
  */
 #include QMK_KEYBOARD_H
 
+
 // Defines the keycodes used by our macros in process_record_user
 enum custom_keycodes {
     QWERTY = SAFE_RANGE,
     LOWER,
-    RAISE
+    RAISE,
+    KC_LRST
 };
-
 
 #define KC_LOW LOWER
 #define KC_RAI RAISE
@@ -88,7 +89,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|----+----+----+----+----+----|                        |----+----+----+----+----+----|
          ,LTOG,LMOF,LVAI,LHUI,LSAI,                         LEFT,DOWN, UP ,RGHT,    ,F12 ,
   //`----+----+----+----+----+----|                        |----+----+----+----+----+----'
-              ,LMOP,LVAD,LHUD,LSAD,                         HOME,PGDN,PGUP,END ,    ,
+          LRST,LMOP,LVAD,LHUD,LSAD,                         HOME,PGDN,PGUP,END ,    ,
   //     `----+----+----+----+----+----+----.    ,----+----+----+----+----+----+----+----'
                          LALT,LCMD,    ,LSFT,     CDEL,    ,SENT,ABSP
   //                    `----+----+----+----'    `----+----+----+----'
@@ -97,6 +98,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
+    case KC_LRST:
+      if (record->event.pressed) {
+#ifdef RGBLED_ENABLE
+        eeconfig_update_rgbled_default();
+        rgbled_enable();
+#endif
+      }
+      break;
     case QWERTY:
       if (record->event.pressed) {
         set_single_persistent_default_layer(_QWERTY);
