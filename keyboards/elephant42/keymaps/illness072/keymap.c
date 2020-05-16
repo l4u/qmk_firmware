@@ -17,6 +17,12 @@
 #include QMK_KEYBOARD_H
 
 
+#ifdef OLED_DRIVER_ENABLE
+#include <stdio.h>
+#define STEP 32
+uint8_t kp = 0;
+#endif
+
 // Defines the keycodes used by our macros in process_record_user
 enum custom_keycodes {
     QWERTY = SAFE_RANGE,
@@ -129,6 +135,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
       break;
     }
+#ifdef OLED_DRIVER_ENABLE
+    if (record->event.pressed) {
+      kp = (kp + 1) % STEP;
+    }
+#endif
     return true;
 }
 
@@ -148,39 +159,176 @@ void led_set_user(uint8_t usb_led) {
 
 const char *read_logo(void) {
   static char logo[] = {
-      0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94,
-      0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf, 0xb0, 0xb1, 0xb2, 0xb3, 0xb4,
-      0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf, 0xd0, 0xd1, 0xd2, 0xd3, 0xd4,
-      0};
+
+
+
+     };
   return logo;
 }
 
 void oled_task_user(void) {
-  if (is_keyboard_master()) {
-    // Host Keyboard Layer Status
-    oled_write_P(PSTR("Layer: "), false);
-    switch (get_highest_layer(layer_state)) {
-    case _QWERTY:
-      oled_write_P(PSTR("Default\n"), false);
-      break;
-    case _LOWER:
-      oled_write_P(PSTR("Lower\n"), false);
-      break;
-    case _RAISE:
-      oled_write_P(PSTR("Raise\n"), false);
-      break;
-    default:
-      // Or use the write_ln shortcut over adding '\n' to the end of your string
-      oled_write_ln_P(PSTR("Undefined"), false);
-    }
-
-    // Host Keyboard LED Status
-    uint8_t led_usb_state = host_keyboard_leds();
-    oled_write_P(led_usb_state & (1<<USB_LED_NUM_LOCK) ? PSTR("NUMLCK ") : PSTR("       "), false);
-    oled_write_P(led_usb_state & (1<<USB_LED_CAPS_LOCK) ? PSTR("CAPLCK ") : PSTR("       "), false);
-    oled_write_P(led_usb_state & (1<<USB_LED_SCROLL_LOCK) ? PSTR("SCRLCK ") : PSTR("       "), false);
+  static char layer_names[_NUM_OF_LAYERS][10] = {
+    "Default",
+    "Lower",
+    "Raise",
+    "Adjust"
+  };
+  if (!is_keyboard_master()) {
+    static char logo[84] = { 0 };
+    static char l1[] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0 };
+    static char l2[] = { 0x95, 0x96, 0x97, 0x98, 0x99, 0 };
+    static char l3[] = { 0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0 };
+    static char l4[] = { 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0 };
+    snprintf(logo, 84,
+             "Layer: %-8s%5s\n"
+             "%-15s%s\n"
+             "%-15s%s\n"
+             "%-15d%s",
+             layer_names[get_highest_layer(layer_state)], l1,
+             "", l2,
+             "", l3,
+             kp, l4
+             );
+    oled_write(logo, false);
+    //oled_write_P(layerStr, false);
   } else {
-    oled_write(read_logo(), false);
+    static char logo[84] = { 0 };
+    static char l1[] = { 0xa0, 0xa1, 0xa2, 0xa3, '\0' };
+    static char l2[] = { 0xc0, 0xc1, 0xc2, 0xc3, '\0' };
+    static char l3[] = { 0xaf, 0xb0, 0xb1, 0xb2, '\0' };
+    static char l4[] = { 0xcf, 0xd0, 0xd1, 0xd2, '\0' };
+    char *a, *b;
+    if (kp < STEP/2) {
+      a = l1;
+      b = l2;
+    } else {
+      a = l3;
+      b = l4;
+    }
+    int space = kp % STEP;
+    if (space > STEP/2) space = STEP - space;
+    switch (space) {
+    case 0:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "                %s\n"
+               "                %s",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 1:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "               %s\n"
+               "               %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 2:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "              %s\n"
+               "              %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 3:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "             %s\n"
+               "             %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 4:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "            %s\n"
+               "            %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 5:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "           %s\n"
+               "           %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 6:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "          %s\n"
+               "          %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 7:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "         %s\n"
+               "         %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 8:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "        %s\n"
+               "        %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 9:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "       %s\n"
+               "       %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 10:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "      %s\n"
+               "      %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 11:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "     %s\n"
+               "     %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 12:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "    %s\n"
+               "    %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 13:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "   %s\n"
+               "   %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 14:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "  %s\n"
+               "  %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 15:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               " %s\n"
+               " %s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    case 16:
+      snprintf(logo, 84,
+               "Layer: %s\n\n"
+               "%s\n"
+               "%s\n",
+               layer_names[get_highest_layer(layer_state)], a, b);
+      break;
+    }
+    oled_write(logo, false);
   }
 }
 #endif
