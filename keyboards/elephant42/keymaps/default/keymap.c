@@ -15,6 +15,13 @@
  */
 #include QMK_KEYBOARD_H
 
+#ifdef OLED_DRIVER_ENABLE
+#include <stdio.h>
+#define STEP 32
+uint8_t kp = 0;
+#endif
+
+
 // Defines the keycodes used by our macros in process_record_user
 enum custom_keycodes {
     QWERTY = SAFE_RANGE,
@@ -68,82 +75,69 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-    case QWERTY:
-      if (record->event.pressed) {
-        set_single_persistent_default_layer(_QWERTY);
-      }
-      return false;
-      break;
-    case LOWER:
-      if (record->event.pressed) {
-        layer_on(_LOWER);
-      } else {
-        layer_off(_LOWER);
-      }
-      return false;
-      break;
-    case RAISE:
-      if (record->event.pressed) {
-        layer_on(_RAISE);
-      } else {
-        layer_off(_RAISE);
-      }
-      return false;
-      break;
+  switch (keycode) {
+  case QWERTY:
+    if (record->event.pressed) {
+      set_single_persistent_default_layer(_QWERTY);
     }
-    return true;
+    return false;
+    break;
+  case LOWER:
+    if (record->event.pressed) {
+      layer_on(_LOWER);
+    } else {
+      layer_off(_LOWER);
+    }
+    return false;
+    break;
+  case RAISE:
+    if (record->event.pressed) {
+      layer_on(_RAISE);
+    } else {
+      layer_off(_RAISE);
+    }
+    return false;
+    break;
+  }
+#ifdef OLED_DRIVER_ENABLE
+  if (record->event.pressed) {
+    kp = (kp + 1) % STEP;
+  }
+#endif
+  return true;
 }
 
-void matrix_init_user(void) {
+void matrix_init_user(void) {}
 
-}
+void matrix_scan_user(void) {}
 
-void matrix_scan_user(void) {
-
-}
-
-void led_set_user(uint8_t usb_led) {
-
-}
+void led_set_user(uint8_t usb_led) {}
 
 #ifdef OLED_DRIVER_ENABLE
-
-const char *read_logo(void) {
-  static char logo[] = {
-      0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94,
-      0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf, 0xb0, 0xb1, 0xb2, 0xb3, 0xb4,
-      0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf, 0xd0, 0xd1, 0xd2, 0xd3, 0xd4,
-      0};
-  return logo;
-}
-
 void oled_task_user(void) {
   if (is_keyboard_master()) {
-    // Host Keyboard Layer Status
-    oled_write_P(PSTR("Layer: "), false);
-    switch (get_highest_layer(layer_state)) {
-    case _QWERTY:
-      oled_write_P(PSTR("Default\n"), false);
-      break;
-    case _LOWER:
-      oled_write_P(PSTR("Lower\n"), false);
-      break;
-    case _RAISE:
-      oled_write_P(PSTR("Raise\n"), false);
-      break;
-    default:
-      // Or use the write_ln shortcut over adding '\n' to the end of your string
-      oled_write_ln_P(PSTR("Undefined"), false);
+    char disp[(21*4)+1] = {0};
+    static char layer_names[_NUM_OF_LAYERS][10] = {"Default", "Lower", "Raise", "Adjust"};
+    static char l1[] = "                \x94\x95\x96\x97";
+    static char l2[] = "                \xB4\xB5\xB6\xB7";
+    static char r1[] = "                \x98\x99\x9A\x9B";
+    static char r2[] = "                \xB8\xB9\xBA\xBB";
+    int space = kp % STEP;
+    if (space > STEP / 2) space = STEP - space;
+    if (kp < STEP / 2) {
+      snprintf(disp, 84, "Layer: %s\n\n%s\n%s\n",
+               layer_names[get_highest_layer(layer_state)], l1 + space, l2 + space);
+    } else {
+      snprintf(disp, 84, "Layer: %s\n\n%s\n%s\n",
+               layer_names[get_highest_layer(layer_state)], r1 + space, r2 + space);
     }
-
-    // Host Keyboard LED Status
-    uint8_t led_usb_state = host_keyboard_leds();
-    oled_write_P(led_usb_state & (1<<USB_LED_NUM_LOCK) ? PSTR("NUMLCK ") : PSTR("       "), false);
-    oled_write_P(led_usb_state & (1<<USB_LED_CAPS_LOCK) ? PSTR("CAPLCK ") : PSTR("       "), false);
-    oled_write_P(led_usb_state & (1<<USB_LED_SCROLL_LOCK) ? PSTR("SCRLCK ") : PSTR("       "), false);
+    oled_write(disp, false);
   } else {
-    oled_write(read_logo(), false);
+    static char *logo = "\n"
+      "\x8f\x90\x91\x92\x93\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\n"
+      "\xaf\xb0\xb1\xb2\xb3\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\n"
+      "\xcf\xd0\xd1\xd2\xd3\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\n";
+    oled_write(logo, false);
   }
 }
 #endif
